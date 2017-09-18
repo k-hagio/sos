@@ -534,7 +534,15 @@ class Plugin(object):
                 copyspec = self.join_sysroot(copyspec)
 
             files = self._expand_copy_spec(copyspec)
-            files.sort()
+            if sizelimit and (len(files) > 1):
+                def get_mtime(x):
+                    try:
+                        return os.path.getmtime(x)
+                    except (OSError, FileNotFoundError):
+                        return -1
+                files.sort(key=get_mtime, reverse=True)
+            else:
+                files.sort()
             if len(files) == 0:
                 continue
 
